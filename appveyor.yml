@@ -54,78 +54,6 @@ environment:
     VSVER: 14
     PLATFORM: x86
     DEPLOY: false
-  - QT5: Qt\5.8\mingw53_32
-    QT_VERSION: Qt5.8
-    QMAKE_GENERATOR: "MinGW Makefiles"
-    MINGW_PATH: C:\Qt\Tools\mingw530_32\bin
-    PLATFORM: x86
-    DEPLOY: false
-  - QT5: Qt\5.8\msvc2015_64
-    QT_VERSION: Qt5.8
-    QMAKE_GENERATOR: "NMake Makefiles JOM"
-    VSVER: 14
-    PLATFORM: x64
-    DEPLOY: false
-  - QT5: Qt\5.8\msvc2015
-    QT_VERSION: Qt5.8
-    QMAKE_GENERATOR: "NMake Makefiles JOM"
-    VSVER: 14
-    PLATFORM: x86
-    DEPLOY: false
-  - QT5: Qt\5.7\mingw53_32
-    QT_VERSION: Qt5.7
-    QMAKE_GENERATOR: "MinGW Makefiles"
-    MINGW_PATH: C:\Qt\Tools\mingw530_32\bin
-    PLATFORM: x86
-    DEPLOY: false
-  - QT5: Qt\5.7\msvc2015_64
-    QT_VERSION: Qt5.7
-    QMAKE_GENERATOR: "NMake Makefiles JOM"
-    VSVER: 14
-    PLATFORM: x64
-    DEPLOY: false
-  - QT5: Qt\5.7\msvc2015
-    QT_VERSION: Qt5.7
-    QMAKE_GENERATOR: "NMake Makefiles JOM"
-    VSVER: 14
-    PLATFORM: x86
-    DEPLOY: false
-  - QT5: Qt\5.6\mingw49_32
-    QT_VERSION: Qt5.6
-    QMAKE_GENERATOR: "MinGW Makefiles"
-    MINGW_PATH: C:\Qt\Tools\mingw492_32\bin
-    PLATFORM: x86
-    DEPLOY: false
-  - QT5: Qt\5.6\msvc2015_64
-    QT_VERSION: Qt5.6
-    QMAKE_GENERATOR: "NMake Makefiles JOM"
-    VSVER: 14
-    PLATFORM: x64
-    DEPLOY: false
-  - QT5: Qt\5.6\msvc2015
-    QT_VERSION: Qt5.6
-    QMAKE_GENERATOR: "NMake Makefiles JOM"
-    VSVER: 14
-    PLATFORM: x86
-    DEPLOY: false
-  - QT5: Qt\5.5\mingw492_32
-    QT_VERSION: Qt5.5
-    QMAKE_GENERATOR: "MinGW Makefiles"
-    MINGW_PATH: C:\Qt\Tools\mingw492_32\bin
-    PLATFORM: x86
-    DEPLOY: false
-  - QT5: Qt\5.4\mingw491_32
-    QT_VERSION: Qt5.4
-    QMAKE_GENERATOR: "MinGW Makefiles"
-    MINGW_PATH: C:\Qt\Tools\mingw491_32\bin
-    PLATFORM: x86
-    DEPLOY: false
-  - QT5: Qt\5.3\mingw482_32
-    QT_VERSION: Qt5.3
-    QMAKE_GENERATOR: "MinGW Makefiles"
-    MINGW_PATH: C:\Qt\Tools\mingw482_32\bin
-    PLATFORM: x86
-    DEPLOY: false
 
 # scripts that are called at very beginning, before repo cloning
 init:
@@ -133,6 +61,7 @@ init:
   - path
   - set QTDIR=C:\%QT5%
   - set PATH=%QTDIR%\bin;%QTDIR%\include;C:\Tools\PsTools;C:\Windows\system32;C:\Windows;C:\Windows\System32\WindowsPowerShell\v1.0\
+  - set PATH=%PATH%;C:\Program Files\Git\cmd"
   - ps: $env:VSCOMNTOOLS=(Get-Content ("env:VS" + "$env:VSVER" + "0COMNTOOLS"))
   - if NOT "%QMAKE_GENERATOR%" == "MinGW Makefiles" echo "Using Visual Studio %VSVER%.0 at %VSCOMNTOOLS%"
   - if "%QMAKE_GENERATOR%" == "MinGW Makefiles" echo "Using MinGW"
@@ -178,7 +107,7 @@ matrix:
 #---------------------------------#
   
 notifications:
-  # Email
+# Email
   - provider: Email
     to:
       - steve+vpo2@conklinhouse.com

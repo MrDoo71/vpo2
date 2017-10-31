@@ -9,7 +9,7 @@
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
  **  Copyright (C) 2013-2015 Valentina project
- **  <https://bitbucket.org/dismine/valentina> All Rights Reserved.
+ **  <https://github.com/valentina-project/vpo2> All Rights Reserved.
  **
  **  Valentina is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ void DialogLayoutProgress::Error(const LayoutErrors &state)
             qCritical() << tr("Couldn't prepare data for creation layout");
             break;
         case LayoutErrors::EmptyPaperError:
-            qCritical() << tr("Several workpieces left not arranged, but none of them match for paper");
+            qCritical() << tr("One or more pattern pieces are bigger than the paper format you selected. Please select a bigger paper format.");
             break;
         case LayoutErrors::ProcessStoped:
         default:

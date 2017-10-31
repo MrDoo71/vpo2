@@ -9,7 +9,7 @@
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
  **  Copyright (C) 2015 Valentina project
- **  <https://bitbucket.org/dismine/valentina> All Rights Reserved.
+ **  <https://github.com/valentina-project/vpo2> All Rights Reserved.
  **
  **  Valentina is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU General Public License as published by
@@ -310,6 +310,27 @@ qreal UnitConvertor(qreal value, const Unit &from, const Unit &to)
     }
     return 0;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief UnitConvertor Converts the values of the given margin from given unit to the new unit.
+ * returns a new instand of QMarginsF.
+ *
+ * @param margin
+ * @param from
+ * @param to
+ * @return
+ */
+QMarginsF UnitConvertor(const QMarginsF &margins, const Unit &from, const Unit &to)
+{
+    const qreal left = UnitConvertor(margins.left(),from, to);
+    const qreal top = UnitConvertor(margins.top(),from, to);
+    const qreal right = UnitConvertor(margins.right(),from, to);
+    const qreal bottom = UnitConvertor(margins.bottom(),from, to);
+
+    return QMarginsF(left, top, right, bottom);
+}
+
 
 //---------------------------------------------------------------------------------------------------------------------
 QStringList SupportedLocales()

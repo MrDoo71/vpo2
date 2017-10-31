@@ -9,7 +9,7 @@
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
  **  Copyright (C) 2013-2015 Valentina project
- **  <https://bitbucket.org/dismine/valentina> All Rights Reserved.
+ **  <https://github.com/valentina-project/vpo2> All Rights Reserved.
  **
  **  Valentina is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@
 #include <QString>
 #include <QtGlobal>
 
+#include "../vmisc/def.h"
 #include "../vlayout/vbank.h"
 #include "vcommonsettings.h"
 
@@ -154,6 +155,19 @@ public:
     bool GetTextAsPaths() const;
     static bool GetDefTextAsPaths();
     void SetTextAsPaths(bool value);
+
+    // settings for the tiled PDFs
+    QMarginsF GetTiledPDFMargins(const Unit &unit) const;
+    void SetTiledPDFMargins(const QMarginsF &value, const Unit &unit);
+
+    qreal GetTiledPDFPaperHeight(const Unit &unit) const;
+    void SetTiledPDFPaperHeight(qreal value, const Unit &unit);
+
+    qreal GetTiledPDFPaperWidth(const Unit &unit) const;
+    void SetTiledPDFPaperWidth(qreal value, const Unit &unit);
+
+    PageOrientation GetTiledPDFOrientation() const;
+    void SetTiledPDFOrientation(PageOrientation value);
 
 private:
     Q_DISABLE_COPY(VSettings)

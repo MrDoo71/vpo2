@@ -9,7 +9,7 @@
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
  **  Copyright (C) 2015 Valentina project
- **  <https://bitbucket.org/dismine/valentina> All Rights Reserved.
+ **  <https://github.com/valentina-project/vpo2> All Rights Reserved.
  **
  **  Valentina is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU General Public License as published by
@@ -62,6 +62,8 @@ enum class Unit : char { Mm = 0, Cm, Inch, Px, LAST_UNIT_DO_NOT_USE};
 enum class Source : char { FromGui, FromFile, FromTool };
 enum class NodeUsage : bool {NotInUse = false, InUse = true};
 enum class SelectionType : bool {ByMousePress, ByMouseRelease};
+
+enum class PageOrientation : bool {Portrait = true, Landscape = false};
 
 enum class PieceNodeAngle : unsigned char
 {
@@ -408,6 +410,7 @@ Q_REQUIRED_RESULT double ToPixel(double val, const Unit &unit);
 Q_REQUIRED_RESULT double FromPixel(double pix, const Unit &unit);
 
 Q_REQUIRED_RESULT qreal UnitConvertor(qreal value, const Unit &from, const Unit &to);
+Q_REQUIRED_RESULT QMarginsF UnitConvertor(const QMarginsF &margins, const Unit &from, const Unit &to);
 
 void InitLanguages(QComboBox *combobox);
 Q_REQUIRED_RESULT QStringList SupportedLocales();

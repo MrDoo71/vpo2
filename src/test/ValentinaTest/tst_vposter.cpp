@@ -9,7 +9,7 @@
  **  This source code is part of the Valentine project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
  **  Copyright (C) 2015 Valentina project
- **  <https://bitbucket.org/dismine/valentina> All Rights Reserved.
+ **  <https://github.com/valentina-project/vpo2> All Rights Reserved.
  **
  **  Valentina is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ void TST_VPoster::BigPoster()
 
     const QRect image(0, 0, 2622, 3178); // Little bit bigger than A1
     VPoster posterazor(&printer);
-    const QVector<PosterData> poster = posterazor.Calc(image, 0);
+    const QVector<PosterData> poster = posterazor.Calc(image, 0, PageOrientation::Portrait);
 
     QCOMPARE(poster.size(), 12);
 
@@ -81,7 +81,7 @@ void TST_VPoster::SmallPoster()
 
     const QRect image(0, 0, 700, 1000); // Little bit less than A4
     VPoster posterazor(&printer);
-    const QVector<PosterData> poster = posterazor.Calc(image, 0);
+    const QVector<PosterData> poster = posterazor.Calc(image, 0, PageOrientation::Portrait);
 
     QCOMPARE(poster.size(), 1);
 

@@ -1,103 +1,97 @@
 language: cpp
+sudo: false
 matrix:
   include:
   - os: linux
     dist: trusty
-    sudo: required
-    compiler: clang
-    env: 
-    - DEPLOY=false
+    compiler: gcc
+    env:
+    - DEPLOY=true
     - CCACHE_CPP2=yes
     cache:
     - ccache
-    directories:
-      - '$HOME/.sonar/cache'
   - os: osx
     compiler: clang
     env: DEPLOY=true
 before_install:
 - |
-  if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+  if [[ \"$TRAVIS_OS_NAME\" == \"linux\" ]]; then
+    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
+    sudo add-apt-repository -y ppa:beineri/opt-qt58-trusty;
     sudo apt-get -qq update;
-    sudo apt-get install -y qtbase5-dev;
-    sudo apt-get install -y libqt5svg5-dev;
-    sudo apt-get install -y qt5-default;
-    sudo apt-get install -y qttools5-dev-tools;
-    sudo apt-get install -y libqt5xmlpatterns5-dev;
-    sudo apt-get install -y libqt5core5a;
-    sudo apt-get install -y libqt5gui5;
-    sudo apt-get install -y libqt5printsupport5;
-    sudo apt-get install -y libqt5svg5;
-    sudo apt-get install -y libqt5widgets5;
-    sudo apt-get install -y libqt5xml5;
-    sudo apt-get install -y libqt5xmlpatterns5;
+    sudo apt-get install -y build-essential git;
+    sudo apt-get install -y qt58base;
+    sudo apt-get install -y qt58svg;
+    sudo apt-get install -y qt58xmlpatterns;
+    sudo apt-get install -y qt58imageformats;
+    sudo apt-get install -y qt58tools;
     sudo apt-get install -y xpdf;
     sudo apt-get install -y xvfb;
+    sudo apt-get install -y g++-5;
     wget https://launchpad.net/ubuntu/+archive/primary/+files/ccache_3.3.4-1_amd64.deb;
     sudo dpkg -i ccache_3.3.4-1_amd64.deb;
+    sudo chmod +x /opt/qt58/bin/qt58-env.sh;
+    /opt/qt58/bin/qt58-env.sh;
   else
     brew update > /dev/null;
     brew install qt5;
-    chmod -R 755 /usr/local/opt/qt5/*
+    chmod -R 755 /usr/local/opt/qt5/*;
   fi
 before_script:
 - |
   if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
     uname -a;
-    which qmake;
+    which /opt/qt58/bin/qmake;
+    /opt/qt58/bin/qmake --version;   
   else
     QTDIR="/usr/local/opt/qt5";
     PATH="$QTDIR/bin:$PATH";
     LDFLAGS=-L$QTDIR/lib;
     CPPFLAGS=-I$QTDIR/include;
     PKG_CONFIG_PATH=/usr/local/opt/qt5/lib/pkgconfig;
+    chmod -R 755 /usr/local/opt/qt5/*;  
+    qmake --version;  
   fi
 - mkdir build
 - cd build
 - pwd
-- qmake --version
 - |
   if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    qmake ../Valentina.pro -r -spec linux-clang CONFIG+=noDebugSymbols CONFIG+=checkWarnings;
+    /opt/qt58/bin/qmake ../Valentina.pro -r CONFIG+=noDebugSymbols CONFIG+=checkWarnings;
   else
-    qmake ../Valentina.pro -r CONFIG+=noDebugSymbols CONFIG+=no_ccache CONFIG+=checkWarnings CONFIG+=noTests;
+    qmake ../Valentina.pro -r CONFIG+=noDebugSymbols CONFIG+=no_ccache CONFIG+=noTests;
   fi
 script:
-- $CXX --version
-- |
-  if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    build-wrapper-linux-x86-64 --out-dir ../bw-outputs make -j$(nproc);
-    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$TRAVIS_BUILD_DIR/build/src/libs/vpropertyexplorer/bin:$TRAVIS_BUILD_DIR/build/src/libs/qmuparser/bin";
-    xvfb-run -a make --silent check TESTARGS="-silent";
-    cd ..;
-    sonar-scanner;
-  else
-    make -j1;
-  fi  
+- "$CXX --version"
+- "if [[ \"$TRAVIS_OS_NAME\" == \"linux\" ]]; then\n  build-wrapper-linux-x86-64 --out-dir
+  ../bw-outputs make -j$(nproc);\n  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\"$TRAVIS_BUILD_DIR/build/src/libs/vpropertyexplorer/bin:$TRAVIS_BUILD_DIR/build/src/libs/qmuparser/bin\";\n
+  \ xvfb-run -a make --silent check TESTARGS=\"-silent\";\n  cd ..;\n  else\n
+  \ make -j8;\nfi  \n"
 notifications:
   email:
     recipients:
-    - dismine@gmail.com
-    on_success: change
+    - susan.spencer@gmail.com
+    on_success: always
     on_failure: always
 before_deploy:
 - |
-  if [[ "$DEPLOY" == "true" ]]; then
+  if [[ ("$TRAVIS_OS_NAME" == "osx") && ("$DEPLOY" == "true" ) ]]; then
     ../scripts/macfixqtdylibrpath.py $TRAVIS_BUILD_DIR/build/src/app/valentina/bin/Valentina.app;
     tar --exclude "*.DS_Store" -cvzf valentina-osx-${TRAVIS_COMMIT}.tar.gz $TRAVIS_BUILD_DIR/build/src/app/valentina/bin/Valentina.app/;
   fi
 deploy:
-  provider: bintray
-  skip_cleanup: true
-  file: ../share/bintray.json
-  user: dismine
+  provider: launchpad
+  slug: "librefashion"
+  user: slspencer
   key:
-    secure: bO6brggaax+GHaTCf/7eMkCm/tTRLrKl9RgSO/gKE39aDPEOqNl3TIGZ2IxhYXxYbD2oXPuliamTfDX8mE/9pXKB/R6W4ncbanBKEif8qkf0xP8qgZ7b32E6k7wnBE+xlsX/9zxdwN0ANE6aB3pg49oCZGChLt5PSFy9e5Xowq73oLVAHIGcomPbnLgN9zi+QSvRqj8blGs8HGBXzezlANrZJtDAuNExU3VfJvzFrdvlgh+D5A4RC9t1xxwu1WcyOc9xSymoCHmkQEOz4IYQQ960h4n0XWDeAf8LSDNXYOZogGXqRMi3APu2EHfH9KBSr1IiICY9gQE6inDzPs1jHvrEORmqQzMF3r/59MSEHw2X6qX6CxXs+IYxRxCpbh7dx2svi7K+M+CMhBSSBjoEi443U3+fsWQclMoOAV4AOTu3fmPb4Bknb/fPoN8MxqRXZjNkCOll2TgDESBjivBCHWF9T71/k3tnBEjp1SlQy4JU5CEgATMBcg7mwGDLymHFFyAuUbgb8XrnOuXfx6dlpiJVZBG5t6T41z7ofVh1GILOm9Q2wpL/Adqyb0hp+tehZHbMZpGw/6ennM2GDfAmMTHYeSgLlTe5dK/kdr+6GAqNRWWTbltC+ZUz+y+DJeYuIbRKMtyd6fFZX6Q5zj6wjkPdmYhlazW5o5HlBhrd2H8=
+    secure: bO6brggaax+GHaTCf/7eMkCm/tTRLrKl9RgSO/gKE39aDPEOqNl3TIGZ2IxhYXxYbD2oXPuliamTfDX8mE/9pXKB/R6W4ncbanBKEif8qkf0xP8qgZ7b32E6k7wnBE+xlsX/9zxdwN0ANE6aB3pg49oCZGChLt5PSFy9e5Xowq73oLVAHIGcomPbnLgN9zi+QSvRqj8blGs8HGBXzezlANrZJtDAuNExU3VfJvzFrdvlgh+D5A4RC9t1xxwu1WcyOc9xSymoCHmkQEOz4IYQQ960h4n0XWDeAf8LSDNXYOZogGXqRMi3APu2EHfH9KBSr1IiICY9gQE6inDzPs1jHvrEORmqQzMF3r/59MSEHw2X6qX6CxXs+IYxRxCpbh7dx2svi7K+M+CMhBSSBjoEi443U3+fsWQclMoOAV4AOTu3fmPb4Bknb/fPoN8MxqRXZjNkCOll2TgDESBjivBCHWF9T71/k3tnBEjp1SlQy4JU5CEgATMBcg7mwGDLymHFFyAuUbgb8XrnOuXfx6dlpiJVZBG5t6T41z7ofVh1GILOm9Q2wpL/Adqyb0hp+tehZHbMZpGw/6ennM2GDfAmMTHYeSgLlTe5dK/kdr+6GAqNRWWTbltC+ZUz+y+DJeYuIbRKMtyd6fFZX6Q5zj6wjkPdmYhlazW5o5HlBhrd2H8=  
+  oauth_token:
+    secure: lN7xFBiec7we2dftKudjaSinNRvMjoUa+1C/r4niBOIZ4LWvf6ung53e48YAsWykcqe1q2M7LsaMTnZD3eS/PMwxstg/ucNH70ASb5PZOLrbANX2aBrGJLr5OgnXPngC5dcIULRUUDiDIEzs1YW60LPEt7hFHyvTaLCpA9tXq6KysBz8om0FuKvMKmdjNu/CvIxWWKs+4jhFDz7Ddy/NX2litnQgBw50YJBPpZMDUKYrAGzXuQ/2yzbj2fcLeYAG9GC5wQFC+PfV/Pp8HuQzmvtu1V/b+NvVAXgHnIBRGHDqhS+3tzQbIJCMLgOgkPQQbGcph+9TTGnHUvsTBmu9L/3Zw2knSBwQS3B49SLviMlII6h58SAZrZFcbpmHMkXs9ZP4OCylzcXitRFDbHSbh0gBTlSjkcvao6qOQdsQNuwom4ZKu1X1SIqu6vOwjpPDRHtvInG8fqC1DtoEVsHvrKZHFS/vNdYlwZf9cErXYHv6WuuKFkmZrRmifj1ZW31xx8bVwnT6aN3+k+Op9K96ePHM31j6kIcEqkKQm0ZoyPo5gXonwBGYUlSliA5XGUif45ew+3A74I0TbgajD3gL13kRgVaugx8VbsJKdaPvoZVTvWtCFTKteq3Ftqc/EgpBR4WUsQEFdH/mVWlKnY7H4zZIPH3dLJz6We2ykYIMZ8I=
+  oauth_token_secret:
+    secure: XzNBGaI+VDs6xAKeMyUna3ic2wjrx1zGJrVIBPpE/lkr+gkNGGhw5dB7BxpS6lHQ7ThqPWOkpMbljPV3NJrvrwhpIqRWLzc8eS8Ixxu4rDKUAaJeXj0DpwfL9OVoWIS4Kht8BxpJF+Ptp7wQkm//6vblh8wnfAh6yWPzLM+/yd1v3RcU5CS+N5YImVwGI2FAWPn9lfrdH+dS7HMTTypBVWUytHtsYDG02KoQR/0jp3ts3fEU9+RDaskxBXls3jSHDpOWBQS1/LC8lf1vjM9yRKICYE/OmuezLsr6a5suNCsP5a/QqWI76nhwGtvBsDBeEBHBNZtwujgyScizd0tBmh4FX3dU1hv33i2sYXLxhlx2yypcIhOgjJv9zmZhkX1aNbVsfCRU4BdsZwDCAuGljADkAz0Q0/DPZQbnhi2cQ9OyVc0GO6DNh54iY9hvraQ2kocnuNR5d1zXMLBhAYEeeKnQQd+BaNQvKMETaVpWN8SEuJGWeLNRSURe8XSsnvEhKdVgxy3ZXG8Lh3IWaXtDvooMdeugOohpxqbK3VVZODYyyyC2GmVeUnym2Dj7Mmwu+VOG0Eza5+2OJHfkILn4wSh0mr0WhaSxS7pzjCKmzXufx2Zm0LoBUiNCEdApUoZ0Hv6lEQSNWDearrBI+cvulQD7Cx6flRGY0ymWlbgcCzo=
+  skip_cleanup: true
   dry-run: false
   on:
     all_branches: true
-    condition: $DEPLOY = true
-addons:
-  sonarqube:
-    token:
-      secure: Et0JMrRcVfmlNs+pwqUY1fJx49/SSwss0NMe46nSv8D6Tnv9zlPZyA8KPmOq3jIc9zsoa40dcrp3eXd3jBZrULSb2gD8KkAJAWuTFmBH7Hu18t8LGEnorh0puHK8S2jV5Ueowig67PF8hh20KjErDo7Wo0FDc14lLxCsm20Jt0WKzHU50aqWxAGY3f5f8po/o/6ClcuqPNfqXy4i93YIjgdsYsN2+PUoCSkm92yE7iA2Ggyx5Np93DajkEd75QtInhcbiP8OmNV0BMCMT41+evSnwgUhmyzzEgICrYwKwij0igsxPWkqiwI/jLC5qAOjp9KZqfK556c3FwsQY8hKEIdGKozXgcDMlBlIivQPF/zeo17LugifXjuie6lhC+e7stresxZSYmLhNFbrcKC98JF1GvBZj6xQnKoqp3+M+JAgP+LskyHVJABLHqbnYG+ubmIsTaTr6CsvRiq/9GoaODJIfkBATkPRb/WvLkPEuoJk3h+mW3oPlUbFVYs+6WPm9/+5WkKcEU7HS2nT1XM94TZh+7Adsd47vLzJ7KQ1vGK6pHChMcAK+MkZshSslvcn4H7is8sFkOSyZdMj/f+dnpTllpmU2AArPPVK6P2bQqGl8n16JY6lBw10KBkodpUd1D6JWXkNQIAyPUGGGjlqeqm1wetfad0hoHqrnQJ7HE0=
+    condition: "$DEPLOY = true"
+
